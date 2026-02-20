@@ -13,3 +13,4 @@ Thumbs.db
 # Node (por si se usa después)
 node_modules/
 dist/
+.vercel
