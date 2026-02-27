@@ -1654,13 +1654,44 @@ img {
     border-color: var(--border-cyan);
 }
 
+.formula-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.formula-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.formula-icon.blue {
+    background: rgba(0, 212, 255, 0.1);
+    color: var(--cyan);
+}
+
+.formula-icon.gold {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--gold);
+}
+
+.formula-icon.purple {
+    background: rgba(123, 47, 190, 0.1);
+    color: var(--purple);
+}
+
 .formula-label {
     font-size: 0.68rem;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 1.5px;
     color: var(--text-muted);
-    margin-bottom: 8px;
 }
 
 .formula-eq {
