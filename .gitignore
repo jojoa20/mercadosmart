@@ -21,3 +21,4 @@ dist/
 # Large video source files
 *.mp4
 .env.local
+.env*.local
