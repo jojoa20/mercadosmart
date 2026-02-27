@@ -782,6 +782,47 @@ img {
     /* Institutional red */
 }
 
+.sparkline-container {
+    width: 45px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 4px;
+}
+
+.sparkline {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.sparkline-path {
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    /* Animation attributes to draw the line */
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    animation: drawSparkline 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.sparkline-container.positive .sparkline-path {
+    stroke: var(--bull-green);
+    filter: drop-shadow(0 0 3px rgba(0, 255, 136, 0.3));
+}
+
+.sparkline-container.negative .sparkline-path {
+    stroke: #FF3B30;
+    filter: drop-shadow(0 0 3px rgba(255, 59, 48, 0.3));
+}
+
+@keyframes drawSparkline {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
 .ticker-h-item .sep {
     color: rgba(255, 255, 255, 0.15);
     margin-left: 12px;
@@ -2147,5 +2188,110 @@ img {
     .scrolly-info {
         gap: 0;
         padding: 0 16px;
+    }
+}
+
+/* --- MAGNETIC SPOTLIGHT CARDS --- */
+/* Target all premium feature cards */
+.scrolly-info,
+.step,
+.asset-cluster,
+.team-card,
+.math-box {
+    position: relative;
+    overflow: hidden;
+    /* Ensure spotlight doesn't bleed out */
+}
+
+/* The Spotlight Pseudo-Element */
+.scrolly-info::before,
+.step::before,
+.asset-cluster::before,
+.team-card::before,
+.math-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    /* Soft cyan/green spotlight matching the futuristic fintech branding */
+    background: radial-gradient(600px circle at var(--mouse-x, -500px) var(--mouse-y, -500px),
+            rgba(0, 255, 136, 0.04),
+            transparent 40%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 0;
+    /* behind content, but inside the card */
+    pointer-events: none;
+}
+
+/* Make sure all child text/content stays strictly above the spotlight */
+.scrolly-info>*,
+.step>*,
+.asset-cluster>*,
+.team-card>*,
+.math-box>* {
+    position: relative;
+    z-index: 1;
+}
+
+/* Reveal the spotlight only on hover */
+.scrolly-info:hover::before,
+.step:hover::before,
+.asset-cluster:hover::before,
+.team-card:hover::before,
+.math-box:hover::before {
+    opacity: 1;
+}
+
+/* --- IMMERSIVE CUSTOM CURSOR --- */
+@media (pointer: fine) {
+
+    body,
+    a,
+    button,
+    input,
+    select,
+    textarea,
+    .step,
+    .team-card,
+    .feature-card,
+    .scrolly-info,
+    .asset-cluster,
+    .ticker-h-item,
+    .crypto-ticker-item {
+        cursor: none !important;
+    }
+}
+
+#custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--cyan);
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.2s ease, border 0.2s ease;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+    /* For smooth LERP physics, we update top/left via JS, and apply transforms via CSS */
+}
+
+#custom-cursor.cursor-hover {
+    transform: translate(-50%, -50%) scale(3.5);
+    background-color: rgba(0, 229, 255, 0.1);
+    border: 1px solid rgba(0, 229, 255, 0.8);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+}
+
+@media (max-width: 1024px),
+(pointer: coarse) {
+    #custom-cursor {
+        display: none !important;
     }
 }

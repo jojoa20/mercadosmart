@@ -4,6 +4,55 @@ window.addEventListener('scroll', () => {
     navbar.classList.toggle('scrolled', window.scrollY > 50);
 }, { passive: true });
 
+// --- MAGNETIC SPOTLIGHT CARDS ---
+const spotlightCards = document.querySelectorAll('.scrolly-info, .step, .asset-cluster, .team-card, .math-box');
+
+spotlightCards.forEach(card => {
+    card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+    });
+});
+
+// --- IMMERSIVE CUSTOM CURSOR ---
+const customCursor = document.getElementById('custom-cursor');
+if (customCursor && window.matchMedia("(pointer: fine)").matches) {
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let cursorX = mouseX;
+    let cursorY = mouseY;
+
+    // Global mouse tracking
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    // High performance render loop (LERP physics)
+    const renderCursor = () => {
+        // Interpolate 25% of the distance per frame for a snappy but smooth delay
+        cursorX += (mouseX - cursorX) * 0.25;
+        cursorY += (mouseY - cursorY) * 0.25;
+
+        customCursor.style.left = `${cursorX}px`;
+        customCursor.style.top = `${cursorY}px`;
+
+        requestAnimationFrame(renderCursor);
+    };
+    requestAnimationFrame(renderCursor);
+
+    // Magnetic interaction triggers
+    const interactiveElements = document.querySelectorAll('a, button, .ticker-h-item, .crypto-ticker-item, .team-card, .scrolly-info');
+    interactiveElements.forEach(el => {
+        el.addEventListener('mouseenter', () => customCursor.classList.add('cursor-hover'));
+        el.addEventListener('mouseleave', () => customCursor.classList.remove('cursor-hover'));
+    });
+}
+
 // Mobile menu
 const mobileToggle = document.getElementById('mobile-toggle');
 const navLinks = document.getElementById('nav-links');
@@ -187,11 +236,20 @@ async function fetchHorizontalTickerData() {
                 const changeVal = parseFloat(coin.priceChangePercent);
                 const changeClass = changeVal >= 0 ? 'positive' : 'negative';
                 const changeSign = changeVal > 0 ? '+' : '';
+                // Sparkline SVG based on trend
+                const sparklinePath = changeVal >= 0
+                    ? '<path d="M 0 16 Q 10 12 20 14 T 40 4" fill="none" class="sparkline-path" />'
+                    : '<path d="M 0 4 Q 10 8 20 10 T 40 16" fill="none" class="sparkline-path" />';
 
                 itemsHtml += `
                     <div class="ticker-h-item">
                         <span class="sym">${sym}</span>
                         <span class="price">$${priceStr}</span>
+                        <div class="sparkline-container ${changeClass}">
+                            <svg viewBox="0 0 40 20" class="sparkline" preserveAspectRatio="none">
+                                ${sparklinePath}
+                            </svg>
+                        </div>
                         <span class="chg ${changeClass}">${changeSign}${changeVal.toFixed(2)}%</span>
                         <span class="sep">|</span>
                     </div>
@@ -213,10 +271,20 @@ async function fetchHorizontalTickerData() {
         const changeSign = stock.change > 0 ? '+' : '';
         const priceStr = stock.basePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+        // Sparkline SVG based on trend
+        const sparklinePath = stock.change >= 0
+            ? '<path d="M 0 16 Q 10 12 20 14 T 40 4" fill="none" class="sparkline-path" />'
+            : '<path d="M 0 4 Q 10 8 20 10 T 40 16" fill="none" class="sparkline-path" />';
+
         itemsHtml += `
             <div class="ticker-h-item">
                 <span class="sym">${stock.symbol}</span>
                 <span class="price">$${priceStr}</span>
+                <div class="sparkline-container ${changeClass}">
+                    <svg viewBox="0 0 40 20" class="sparkline" preserveAspectRatio="none">
+                        ${sparklinePath}
+                    </svg>
+                </div>
                 <span class="chg ${changeClass}">${changeSign}${stock.change.toFixed(2)}%</span>
                 <span class="sep">|</span>
             </div>
