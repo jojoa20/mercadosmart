@@ -1201,22 +1201,19 @@ img {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 40px;
-    padding: 0 20px;
+    bottom: 60px;
+    /* Slightly higher for better framing */
+    padding: 0 40px;
     width: 100%;
     margin: 0 auto;
     text-align: center;
     opacity: 0;
-    transform: translateY(15px);
+    transform: translateY(20px);
     transition: opacity 0.5s ease, transform 0.5s ease;
     pointer-events: none;
-
-    /* 3-Column Layout Container */
-    display: grid;
-    grid-template-columns: 160px minmax(auto, 900px) 160px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 100px;
-    /* Enhanced spacing per user request */
     justify-content: center;
 }
 
@@ -1230,30 +1227,16 @@ img {
 /* Base constraints for the centered text block */
 .scrolly-info-text {
     width: 100%;
+    max-width: 800px;
+    /* Constrain text width for readability */
     margin: 0 auto;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
+    /* Better readability over video */
 }
-
-/* Base constraints for side animations */
-.scrolly-info-anim {
-    width: 100%;
-    max-width: 160px;
-    aspect-ratio: 1 / 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.engine-anim-canvas {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-/* The label was removed from here. */
 
 .scrolly-info h3 {
     font-size: clamp(1.3rem, 2.5vw, 1.8rem);
@@ -2218,14 +2201,8 @@ img {
         font-size: 1.1rem;
     }
 
-    /* Mobile: Hide animations entirely to give text pure focus */
-    .scrolly-info-anim {
-        display: none !important;
-    }
-
     .scrolly-info {
-        gap: 0;
-        padding: 0 16px;
+        padding: 0 20px;
     }
 }
 

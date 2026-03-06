@@ -457,22 +457,6 @@ if (enginesCanvas) {
         const img = engines[engineIdx]?.frames[frameIdx];
         if (img && img.complete && img.naturalWidth > 0) {
             ctx.drawImage(img, 0, 0, enginesCanvas.width, enginesCanvas.height);
-
-            // Draw on the 3-column layout side canvases for the active engine
-            const leftId = `engine-anim-${engineIdx + 1}-left`;
-            const rightId = `engine-anim-${engineIdx + 1}-right`;
-
-            [leftId, rightId].forEach(id => {
-                const sideCanvas = document.getElementById(id);
-                if (sideCanvas) {
-                    const sideCtx = sideCanvas.getContext("2d");
-                    // Sync dimensions to the image source to prevent stretching
-                    sideCanvas.width = enginesCanvas.width;
-                    sideCanvas.height = enginesCanvas.height;
-                    sideCtx.clearRect(0, 0, sideCanvas.width, sideCanvas.height);
-                    sideCtx.drawImage(img, 0, 0, sideCanvas.width, sideCanvas.height);
-                }
-            });
         }
         currentEngine = engineIdx;
         currentFrame = frameIdx;
