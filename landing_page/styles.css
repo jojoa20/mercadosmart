@@ -1118,15 +1118,16 @@ img {
 }
 
 .scrolly-infobar-gradient {
-    height: 200px;
-    background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.85) 70%, rgba(0, 0, 0, 0.95) 100%);
+    height: 400px;
+    /* Taller gradient for smoother transition */
+    background: linear-gradient(to bottom, transparent 0%, rgba(3, 7, 18, 0.5) 40%, rgba(3, 7, 18, 0.8) 100%);
     pointer-events: none;
 }
 
 .scrolly-infobar-content {
-    background: rgba(0, 0, 0, 0.95);
+    background: transparent;
     padding: 0 40px 40px;
-    max-width: 800px;
+    max-width: 100%;
     margin: 0 auto;
     text-align: center;
     pointer-events: auto;

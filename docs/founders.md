@@ -6,27 +6,27 @@
 
 ## Equipo
 
-### [Nombre del Founder 1]
-- **Rol:** CEO / Product & Vision
+### Diego Jojoa
+- **Rol:** Quantitative Finance Director / Ingeniero Financiero
 - **LinkedIn:** [agregar]
 - **Email:** [agregar]
-- **Bio:** [agregar — 2-3 líneas]
+- **Bio:** Especialista en optimización de carteras y gestión de riesgos algorítmicos.
 
 ---
 
-### [Nombre del Founder 2]
-- **Rol:** CTO / Backend & Algoritmos
+### Leonardo Tamara
+- **Rol:** Chief Technology Officer / Arquitectura de Sistemas
 - **LinkedIn:** [agregar]
 - **Email:** [agregar]
-- **Bio:** [agregar — 2-3 líneas]
+- **Bio:** Lidera la visión técnica y la arquitectura Full-Stack de BULLFOLIO.
 
 ---
 
-### [Nombre del Founder 3]
-- **Rol:** CDO / Diseño & Frontend
+### Camilo Puentes
+- **Rol:** Artificial Intelligence Lead / Machine Learning Engineer
 - **LinkedIn:** [agregar]
 - **Email:** [agregar]
-- **Bio:** [agregar — 2-3 líneas]
+- **Bio:** Responsable de la inteligencia predictiva y el procesamiento masivo de datos.
 
 ---
 

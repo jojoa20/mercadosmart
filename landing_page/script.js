@@ -204,25 +204,52 @@ if (tickerTrack) {
     setInterval(fetchCryptoPrices, 10000);
 }
 
-// --- HORIZONTAL MARKET TICKER (Crypto + Stocks) ---
+// --- HORIZONTAL MARKET TICKER (Crypto + Real Stocks via Supabase Edge Function) ---
 const tickerHTrack = document.getElementById('market-ticker-track');
 
-// Since free public stock APIs without CORS/Keys do not exist reliably for frontend,
-// we will fetch Crypto from Binance, and use realistic mock data for stocks that fluctuate slightly.
-const mockStocks = [
-    { symbol: 'SPY', basePrice: 512.85, change: 0.45 },
-    { symbol: 'QQQ', basePrice: 445.62, change: 0.82 },
-    { symbol: 'AAPL', basePrice: 172.44, change: -1.20 },
-    { symbol: 'MSFT', basePrice: 405.12, change: 1.55 },
-    { symbol: 'NVDA', basePrice: 875.38, change: 3.45 }
+// Supabase Edge Function URL for real stock prices (proxies Yahoo Finance, no CORS issues)
+const STOCK_PRICES_URL = 'https://cvrrygffwmxmemlsdnax.supabase.co/functions/v1/stock-prices?symbols=SPY,QQQ,AAPL,MSFT,NVDA';
+
+// Fallback data in case the Edge Function is unreachable (markets closed, etc.)
+let cachedStocks = [
+    { symbol: 'SPY', price: 512.85, change: 0.45 },
+    { symbol: 'QQQ', price: 445.62, change: 0.82 },
+    { symbol: 'AAPL', price: 172.44, change: -1.20 },
+    { symbol: 'MSFT', price: 405.12, change: 1.55 },
+    { symbol: 'NVDA', price: 875.38, change: 3.45 }
 ];
+
+function buildTickerItemHtml(symbol, priceVal, changeVal) {
+    const priceStr = priceVal > 1000
+        ? priceVal.toLocaleString('en-US', { maximumFractionDigits: 0 })
+        : priceVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const changeClass = changeVal >= 0 ? 'positive' : 'negative';
+    const changeSign = changeVal > 0 ? '+' : '';
+    const sparklinePath = changeVal >= 0
+        ? '<path d="M 0 16 Q 10 12 20 14 T 40 4" fill="none" class="sparkline-path" />'
+        : '<path d="M 0 4 Q 10 8 20 10 T 40 16" fill="none" class="sparkline-path" />';
+
+    return `
+        <div class="ticker-h-item">
+            <span class="sym">${symbol}</span>
+            <span class="price">$${priceStr}</span>
+            <div class="sparkline-container ${changeClass}">
+                <svg viewBox="0 0 40 20" class="sparkline" preserveAspectRatio="none">
+                    ${sparklinePath}
+                </svg>
+            </div>
+            <span class="chg ${changeClass}">${changeSign}${changeVal.toFixed(2)}%</span>
+            <span class="sep">|</span>
+        </div>
+    `;
+}
 
 async function fetchHorizontalTickerData() {
     if (!tickerHTrack) return;
 
     let itemsHtml = '';
 
-    // 1. Fetch Crypto (BTC, ETH)
+    // 1. Fetch Crypto from Binance (BTC, ETH) — already works perfectly
     try {
         const hCryptoSymbols = ['BTCUSDT', 'ETHUSDT'];
         const url = `https://api.binance.com/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(hCryptoSymbols))}`;
@@ -231,74 +258,39 @@ async function fetchHorizontalTickerData() {
             const data = await response.json();
             data.forEach(coin => {
                 const sym = coin.symbol.replace('USDT', '');
-                let priceVal = parseFloat(coin.lastPrice);
-                const priceStr = priceVal > 1000 ? priceVal.toLocaleString('en-US', { maximumFractionDigits: 0 }) : priceVal.toLocaleString('en-US', { minimumFractionDigits: 2 });
-                const changeVal = parseFloat(coin.priceChangePercent);
-                const changeClass = changeVal >= 0 ? 'positive' : 'negative';
-                const changeSign = changeVal > 0 ? '+' : '';
-                // Sparkline SVG based on trend
-                const sparklinePath = changeVal >= 0
-                    ? '<path d="M 0 16 Q 10 12 20 14 T 40 4" fill="none" class="sparkline-path" />'
-                    : '<path d="M 0 4 Q 10 8 20 10 T 40 16" fill="none" class="sparkline-path" />';
-
-                itemsHtml += `
-                    <div class="ticker-h-item">
-                        <span class="sym">${sym}</span>
-                        <span class="price">$${priceStr}</span>
-                        <div class="sparkline-container ${changeClass}">
-                            <svg viewBox="0 0 40 20" class="sparkline" preserveAspectRatio="none">
-                                ${sparklinePath}
-                            </svg>
-                        </div>
-                        <span class="chg ${changeClass}">${changeSign}${changeVal.toFixed(2)}%</span>
-                        <span class="sep">|</span>
-                    </div>
-                `;
+                itemsHtml += buildTickerItemHtml(sym, parseFloat(coin.lastPrice), parseFloat(coin.priceChangePercent));
             });
         }
     } catch (err) {
         console.warn("Could not fetch crypto for horizontal ticker", err);
     }
 
-    // 2. Generate smooth stock fluctuations (Bloomberg style)
-    mockStocks.forEach(stock => {
-        // Add minimal realistic jitter
-        const jitter = (Math.random() - 0.5) * 0.1;
-        stock.change += jitter;
-        stock.basePrice = stock.basePrice * (1 + (jitter / 100)); // Price moves with change
+    // 2. Fetch REAL stock prices from Supabase Edge Function (proxied Yahoo Finance)
+    try {
+        const response = await fetch(STOCK_PRICES_URL);
+        if (response.ok) {
+            const stockData = await response.json();
+            if (Array.isArray(stockData) && stockData.length > 0) {
+                cachedStocks = stockData; // Update cache with real data
+            }
+        }
+    } catch (err) {
+        console.warn("Edge Function unreachable, using cached stock data", err);
+    }
 
-        const changeClass = stock.change >= 0 ? 'positive' : 'negative';
-        const changeSign = stock.change > 0 ? '+' : '';
-        const priceStr = stock.basePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-        // Sparkline SVG based on trend
-        const sparklinePath = stock.change >= 0
-            ? '<path d="M 0 16 Q 10 12 20 14 T 40 4" fill="none" class="sparkline-path" />'
-            : '<path d="M 0 4 Q 10 8 20 10 T 40 16" fill="none" class="sparkline-path" />';
-
-        itemsHtml += `
-            <div class="ticker-h-item">
-                <span class="sym">${stock.symbol}</span>
-                <span class="price">$${priceStr}</span>
-                <div class="sparkline-container ${changeClass}">
-                    <svg viewBox="0 0 40 20" class="sparkline" preserveAspectRatio="none">
-                        ${sparklinePath}
-                    </svg>
-                </div>
-                <span class="chg ${changeClass}">${changeSign}${stock.change.toFixed(2)}%</span>
-                <span class="sep">|</span>
-            </div>
-        `;
+    // Render stocks (real data or cached fallback)
+    cachedStocks.forEach(stock => {
+        itemsHtml += buildTickerItemHtml(stock.symbol, stock.price, stock.change);
     });
 
-    // Duplicate string heavily for a long seamless CSS infinite scroll loop
+    // Duplicate for seamless CSS infinite scroll loop
     tickerHTrack.innerHTML = itemsHtml.repeat(4);
 }
 
-// Fetch horizontal immediately, then every 15 seconds
+// Fetch horizontal immediately, then every 30 seconds (Edge Function caches for 30s)
 if (tickerHTrack) {
     fetchHorizontalTickerData();
-    setInterval(fetchHorizontalTickerData, 15000);
+    setInterval(fetchHorizontalTickerData, 30000);
 }
 
 console.log('%c 🐂 BULLFOLIO Robo-Advisor', 'color:#00D4FF;font-size:18px;font-weight:bold;');
