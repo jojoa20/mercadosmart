@@ -439,16 +439,21 @@ img {
 
 /* Removed legacy white floating particles */
 .hero .container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    text-align: center;
     position: relative;
     z-index: 1;
+    min-height: 100vh;
+    padding-top: 80px;
 }
 
 .hero-content {
-    max-width: 580px;
+    max-width: 900px;
+    margin: 0 auto 60px;
+    z-index: 2;
 }
 
 .hero-badge {
@@ -577,16 +582,23 @@ img {
 }
 
 .hero-visual {
-    position: relative;
+    position: absolute;
+    inset: 0;
     display: flex;
     justify-content: center;
     align-items: center;
+    pointer-events: none;
+    z-index: 1;
+    /* Behind text, above canvas */
 }
 
 .hero-image-wrapper {
     position: relative;
-    width: 100%;
-    max-width: 480px;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Logo image float styles were removed to clear the UI */
@@ -632,29 +644,29 @@ img {
 }
 
 .tag-1 {
-    top: 8%;
-    right: -30px;
+    top: 25%;
+    right: 15%;
     animation-delay: 0s;
     border-color: rgba(0, 255, 136, 0.2)
 }
 
 .tag-2 {
-    bottom: 30%;
-    left: -35px;
+    top: 35%;
+    left: 15%;
     animation-delay: -1.5s;
     border-color: rgba(245, 158, 11, 0.2)
 }
 
 .tag-3 {
-    bottom: 8%;
-    right: 5%;
+    bottom: 25%;
+    right: 18%;
     animation-delay: -3s;
     border-color: rgba(0, 212, 255, 0.2)
 }
 
 .tag-4 {
-    top: 30%;
-    left: -20px;
+    bottom: 35%;
+    left: 18%;
     animation-delay: -4s;
     border-color: rgba(123, 47, 190, 0.2)
 }
