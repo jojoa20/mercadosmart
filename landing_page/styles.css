@@ -1125,9 +1125,9 @@ img {
 }
 
 .scrolly-infobar-content {
-    background: transparent;
+    background: rgba(0, 0, 0, 0.95);
     padding: 0 40px 40px;
-    max-width: 100%;
+    max-width: 800px;
     margin: 0 auto;
     text-align: center;
     pointer-events: auto;
@@ -1201,14 +1201,14 @@ img {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 60px;
-    /* Slightly higher for better framing */
+    bottom: 20px;
+    /* Aligned with the original jojoa version */
     padding: 0 40px;
     width: 100%;
     margin: 0 auto;
     text-align: center;
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(15px);
     transition: opacity 0.5s ease, transform 0.5s ease;
     pointer-events: none;
     display: flex;
