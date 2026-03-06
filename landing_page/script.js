@@ -123,15 +123,7 @@ window.addEventListener('load', () => {
     });
 });
 
-// Hero image parallax
-const heroImg = document.getElementById('hero-logo-img');
-if (heroImg) {
-    window.addEventListener('mousemove', (e) => {
-        const dx = (e.clientX - window.innerWidth / 2) / window.innerWidth;
-        const dy = (e.clientY - window.innerHeight / 2) / window.innerHeight;
-        heroImg.style.transform = `translate(${dx * -10}px,${dy * -10}px)`;
-    }, { passive: true });
-}
+
 
 // CTA Form
 const ctaForm = document.getElementById('cta-form');

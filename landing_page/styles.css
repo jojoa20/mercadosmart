@@ -317,16 +317,7 @@ img {
     mix-blend-mode: screen;
 }
 
-/* Hero Logo */
-.hero-logo-float {
-    width: 100%;
-    max-width: 340px;
-    border-radius: 28px;
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 212, 255, 0.12);
-    animation: float 7s ease-in-out infinite;
-    position: relative;
-    z-index: 2;
-}
+
 
 /* Removing redundant hero-canvas override */
 
