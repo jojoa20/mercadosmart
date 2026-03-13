@@ -44,12 +44,12 @@ export default function Hero() {
                     </span>
                 </h1>
 
-                <h2 className="text-xl md:text-2xl font-semibold text-white/90 mb-6">
-                    Lukas AI detecta tus gastos hormiga automáticamente.
+                <h2 className="text-xl md:text-2xl font-semibold text-white/90 mb-6 max-w-3xl mx-auto">
+                    Lukas AI detecta automáticamente tus gastos hormiga y mejora tu salud financiera.
                 </h2>
 
                 <p className="text-lg md:text-xl text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
-                    Háblale a Lukas, mándale un pantallazo de Nequi o dile cuánto gastaste. Él analiza tus finanzas y encuentra las fugas que están destruyendo tu presupuesto.
+                    Háblale a Lukas, mándale un pantallazo de Nequi o dile cuánto gastaste. Él analiza tus transacciones y encuentra las fugas que están destruyendo tu presupuesto.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -120,40 +120,40 @@ export default function Hero() {
                 </div>
 
                 {/* Floating UI Element 1: Gasto Detectado */}
-                <div className="absolute top-[15%] -left-[10%] sm:-left-[20%] bg-black/60 border border-[#f36e53]/50 backdrop-blur-xl rounded-xl p-3 shadow-2xl animate-[float_5s_ease-in-out_infinite_0.5s]">
+                <div className="absolute top-[15%] -left-[10%] sm:-left-[20%] bg-black/60 border border-[#f36e53]/50 backdrop-blur-xl rounded-xl p-3 shadow-2xl animate-[float_5s_ease-in-out_infinite_0.5s] z-20">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#f36e53]/20 flex items-center justify-center text-[#f36e53]">
+                        <div className="w-8 h-8 rounded-full bg-[#f36e53]/20 flex items-center justify-center text-[#f36e53] flex-shrink-0">
                             💸
                         </div>
                         <div>
                             <p className="text-white text-[10px] uppercase font-bold tracking-wider opacity-70">Gasto detectado</p>
-                            <p className="text-[#f36e53] text-sm font-bold">$15.000 en empanadas</p>
+                            <p className="text-[#f36e53] text-sm font-bold whitespace-nowrap">$15.000 en empanadas</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Floating UI Element 2: Cluster alerta */}
-                <div className="absolute top-[50%] -right-[5%] sm:-right-[15%] bg-black/60 border border-[#f36e53]/50 backdrop-blur-xl rounded-xl p-3 shadow-[0_0_30px_rgba(243,110,83,0.2)] animate-[float_7s_ease-in-out_infinite_1s]">
+                {/* Floating UI Element 2: Alerta General */}
+                <div className="absolute top-[50%] -right-[15%] sm:-right-[25%] bg-black/60 border border-[#f36e53]/50 backdrop-blur-xl rounded-xl p-3 shadow-[0_0_30px_rgba(243,110,83,0.2)] animate-[float_7s_ease-in-out_infinite_1s] z-20">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#f36e53]/20 flex items-center justify-center text-[#f36e53]">
+                        <div className="w-8 h-8 rounded-full bg-[#f36e53]/20 flex items-center justify-center text-[#f36e53] flex-shrink-0">
                             ⚠️
                         </div>
                         <div>
-                            <p className="text-white text-[10px] uppercase font-bold tracking-wider opacity-70">Cluster alerta</p>
-                            <p className="text-[#f36e53] text-sm font-bold">Gastos hormiga</p>
+                            <p className="text-white text-[10px] uppercase font-bold tracking-wider opacity-70">Alerta</p>
+                            <p className="text-[#f36e53] text-sm font-bold leading-tight whitespace-nowrap">Ojo… este mes estás gastando<br />más de lo normal.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Floating UI Element 3: FinScore */}
-                <div className="absolute bottom-[20%] -left-[5%] sm:-left-[15%] bg-black/60 border border-[#d8a93f]/50 backdrop-blur-xl rounded-xl p-3 shadow-[0_0_30px_rgba(216,169,63,0.15)] animate-[float_6s_ease-in-out_infinite_1.5s]">
+                <div className="absolute bottom-[20%] -left-[5%] sm:-left-[15%] bg-black/60 border border-[#d8a93f]/50 backdrop-blur-xl rounded-xl p-3 shadow-[0_0_30px_rgba(216,169,63,0.15)] animate-[float_6s_ease-in-out_infinite_1.5s] z-20">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#d8a93f]/20 flex items-center justify-center text-[#d8a93f]">
+                        <div className="w-8 h-8 rounded-full bg-[#d8a93f]/20 flex items-center justify-center text-[#d8a93f] flex-shrink-0">
                             🏆
                         </div>
                         <div>
-                            <p className="text-white text-[10px] uppercase font-bold tracking-wider opacity-70">FinScore</p>
-                            <p className="text-[#d8a93f] text-sm font-bold">+25 pts</p>
+                            <p className="text-white text-[10px] uppercase font-bold tracking-wider opacity-70">Mejora</p>
+                            <p className="text-[#d8a93f] text-sm font-bold whitespace-nowrap">FinScore +25</p>
                         </div>
                     </div>
                 </div>
