@@ -44,13 +44,26 @@ export default function Hero() {
                     </span>
                 </h1>
 
-                <h2 className="text-xl md:text-2xl font-semibold text-white/90 mb-6 max-w-3xl mx-auto">
-                    Lukas AI detecta automáticamente tus gastos hormiga y mejora tu salud financiera.
+                <h2 className="text-xl md:text-2xl font-bold text-white mb-4 max-w-3xl mx-auto">
+                    Lukas es un agente financiero que detecta automáticamente en qué se te está fugando la plata.
                 </h2>
 
-                <p className="text-lg md:text-xl text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
-                    Háblale a Lukas, mándale un pantallazo de Nequi o dile cuánto gastaste. Él analiza tus transacciones y encuentra las fugas que están destruyendo tu presupuesto.
-                </p>
+                <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-12 max-w-4xl mx-auto">
+                    {[
+                        { icon: "🕵️", text: "Detecta gastos hormiga automáticamente" },
+                        { icon: "📱", text: "Analiza pantallazos de Nequi y Daviplata" },
+                        { icon: "📈", text: "Calcula tu FinScore en tiempo real" }
+                    ].map((bullet, i) => (
+                        <div key={i} className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm group hover:border-[#397dc1]/30 transition-all duration-300">
+                            <span className="text-lg group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+                                {bullet.icon}
+                            </span>
+                            <span className="text-white/80 text-sm font-medium tracking-wide">
+                                {bullet.text}
+                            </span>
+                        </div>
+                    ))}
+                </div>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <button className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#397dc1] to-[#6b4de6] font-bold text-white transition-all duration-300 shadow-[0_0_20px_rgba(57,125,193,0.4)] hover:shadow-[0_0_30px_rgba(57,125,193,0.6)] hover:-translate-y-1 hover:scale-105 btn-glow-hover active:scale-95">
