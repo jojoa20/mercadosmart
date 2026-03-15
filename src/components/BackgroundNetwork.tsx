@@ -15,8 +15,8 @@ export default function BackgroundNetwork() {
     let animationFrameId: number;
     let particles: Particle[] = [];
     const particleCount = 60;
-    const connectionDistance = 150;
-    const colors = ['#397dc1', '#a898c9', '#06b6d4']; // Blue, Purple, Cyan
+    const connectionDistance = 180;
+    const colors = ['#312e81', '#1e1b4b', '#397dc1', '#06b6d4']; // Indigo, Deep Purple, Blue, Cyan
 
     class Particle {
       x: number;
@@ -29,9 +29,9 @@ export default function BackgroundNetwork() {
       constructor(width: number, height: number) {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
-        this.vx = (Math.random() - 0.5) * 0.4; // Very slow motion
-        this.vy = (Math.random() - 0.5) * 0.4;
-        this.radius = Math.random() * 2 + 1;
+        this.vx = (Math.random() - 0.5) * 0.2; // Extra slow
+        this.vy = (Math.random() - 0.5) * 0.2;
+        this.radius = Math.random() * 1.5 + 0.5; // Smaller nodes
         this.color = colors[Math.floor(Math.random() * colors.length)];
       }
 
@@ -39,8 +39,10 @@ export default function BackgroundNetwork() {
         this.x += this.vx;
         this.y += this.vy;
 
-        if (this.x < 0 || this.x > width) this.vx *= -1;
-        if (this.y < 0 || this.y > height) this.vy *= -1;
+        if (this.x < 0) this.x = width;
+        if (this.x > width) this.x = 0;
+        if (this.y < 0) this.y = height;
+        if (this.y > height) this.y = 0;
       }
 
       draw(ctx: CanvasRenderingContext2D) {
@@ -48,9 +50,11 @@ export default function BackgroundNetwork() {
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
         
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 15;
         ctx.shadowColor = this.color;
+        ctx.globalAlpha = 0.4;
         ctx.fill();
+        ctx.globalAlpha = 1;
         ctx.shadowBlur = 0;
       }
     }
@@ -87,10 +91,9 @@ export default function BackgroundNetwork() {
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
             
-            // Opacity based on distance
-            const opacity = 1 - distance / connectionDistance;
-            ctx.strokeStyle = `rgba(168, 152, 201, ${opacity * 0.15})`; // Subtle purple/cyan lines
-            ctx.lineWidth = 0.8;
+            const opacity = (1 - distance / connectionDistance) * 0.1;
+            ctx.strokeStyle = `rgba(57, 125, 193, ${opacity})`; 
+            ctx.lineWidth = 0.5;
             ctx.stroke();
           }
         }
@@ -112,7 +115,7 @@ export default function BackgroundNetwork() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full -z-50 bg-[#0f172a]"
+      className="fixed inset-0 w-full h-full -z-[100] bg-[#020617]"
       style={{ pointerEvents: 'none' }}
     />
   );
