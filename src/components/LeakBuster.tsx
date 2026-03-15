@@ -21,22 +21,37 @@ const STATES = [
 
 export default function LeakBuster() {
     const containerRef = useRef(null);
-    const isInView = useInView(containerRef, { once: true, amount: 0.3 });
-    const [state, setState] = useState(0); // 0: Idle, 1-4: Narrative States
+    const isInView = useInView(containerRef, { amount: 0.3 });
+    const [state, setState] = useState(1);
+    const timersRef = useRef<NodeJS.Timeout[]>([]);
+
+    const clearAllTimers = () => {
+        timersRef.current.forEach(clearTimeout);
+        timersRef.current = [];
+    };
 
     useEffect(() => {
-        if (isInView && state === 0) {
-            setState(1);
-            
-            const timers = [
-                setTimeout(() => setState(2), 2000),
-                setTimeout(() => setState(3), 4000),
-                setTimeout(() => setState(4), 6000)
-            ];
-            
-            return () => timers.forEach(clearTimeout);
+        if (!isInView) {
+            clearAllTimers();
+            return;
         }
-    }, [isInView, state]);
+
+        const runCycle = () => {
+            clearAllTimers();
+            
+            setState(1);
+            timersRef.current.push(setTimeout(() => setState(2), 1500));
+            timersRef.current.push(setTimeout(() => setState(3), 3000));
+            timersRef.current.push(setTimeout(() => setState(4), 4500));
+            
+            // Wait 6s (end of state 4) + 2s pause = 8s
+            timersRef.current.push(setTimeout(runCycle, 8000));
+        };
+
+        runCycle();
+
+        return () => clearAllTimers();
+    }, [isInView]);
 
     // Constant positions for context preservation
     const centerX = 450;
@@ -55,21 +70,21 @@ export default function LeakBuster() {
     }, []);
 
     return (
-        <section className="relative py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
+        <section className="relative py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/5 bg-transparent overflow-hidden">
             
             <div className="text-center mb-16 max-w-4xl mx-auto">
                 <h2 className="text-5xl font-black mb-4 tracking-tighter text-white">
                     Lukas Leak Buster
                 </h2>
-                <p className="text-white/60 text-lg md:text-xl font-medium max-w-[640px] mx-auto">
-                    Lukas analiza automáticamente tus patrones de gasto y detecta fugas de dinero en tiempo real.
-                </p>
+                <h3 className="text-white/60 text-lg md:text-xl font-medium max-w-[640px] mx-auto">
+                    Lukas analiza automáticamente tus patrones de gasto y detecta fugas de dinero.
+                </h3>
             </div>
 
             {/* AI Engine Container */}
             <div 
                 ref={containerRef}
-                className="relative w-full max-w-5xl mx-auto rounded-[24px] p-12 bg-black border border-white/5 overflow-hidden min-h-[750px] shadow-[0_0_100px_rgba(0,0,0,1)]"
+                className="relative w-full max-w-5xl mx-auto rounded-[24px] p-12 bg-black border border-white/5 overflow-hidden min-h-[750px] shadow-[0_0_100px_rgba(33,66,141,0.2)]"
                 style={{ 
                     backgroundImage: 'radial-gradient(circle at center, #1e1b4b 0%, #000 100%)',
                 }}
@@ -87,42 +102,38 @@ export default function LeakBuster() {
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={state}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 1.05 }}
-                            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.4 }}
                             className="flex flex-col items-center gap-2"
                         >
-                            {state > 0 && (
-                                <>
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-2 h-2 rounded-full ${state === 3 ? 'bg-[#f36e53]' : 'bg-[#397dc1]'} animate-pulse`} />
-                                        <span className={`text-xl font-medium tracking-[0.05em] ${state === 3 ? 'text-[#f36e53]' : 'text-white/90'}`}>
-                                            {STATES.find(s => s.id === state)?.message}
-                                        </span>
-                                    </div>
-                                    <div className="h-[1px] w-32 bg-white/10" />
-                                </>
-                            )}
+                            <div className="flex items-center gap-3">
+                                <div className={`w-2.5 h-2.5 rounded-full ${state === 3 ? 'bg-[#f36e53]' : 'bg-[#397dc1]'} animate-pulse`} />
+                                <span className={`text-2xl font-bold tracking-tight ${state === 3 ? 'text-[#f36e53]' : 'text-white/90'}`}>
+                                    {STATES.find(s => s.id === state)?.message}
+                                </span>
+                            </div>
+                            <div className="h-[1px] w-48 bg-white/10" />
                         </motion.div>
                     </AnimatePresence>
                 </div>
 
                 <svg className="w-full h-full relative z-10" viewBox="0 0 900 700">
                     <defs>
-                        <filter id="system-glow">
+                        <filter id="system-glow-fix">
                             <feGaussianBlur stdDeviation="3" result="blur" />
                             <feComposite in="SourceGraphic" in2="blur" operator="over" />
                         </filter>
-                        <filter id="high-alert-glow">
-                            <feGaussianBlur stdDeviation="10" result="blur" />
+                        <filter id="high-alert-glow-fix">
+                            <feGaussianBlur stdDeviation="12" result="blur" />
                             <feComposite in="SourceGraphic" in2="blur" operator="over" />
                         </filter>
                     </defs>
 
                     {/* Central Core: INGRESOS */}
                     <g transform={`translate(${centerX}, ${centerY})`}>
-                        <motion.circle
+                        <circle
                             r={75}
                             fill="#0f172a"
                             stroke="#397dc1"
@@ -133,24 +144,22 @@ export default function LeakBuster() {
                             r={65}
                             fill="#1e1b4b"
                             stroke="#397dc1"
-                            strokeWidth="1.5"
-                            style={{ filter: "url(#system-glow)" }}
-                            initial={{ scale: 0 }}
-                            animate={{ scale: state >= 1 ? 1 : 0 }}
-                            transition={{ duration: 1.5, type: "spring" }}
+                            strokeWidth="2"
+                            style={{ filter: "url(#system-glow-fix)" }}
+                            animate={{ scale: state >= 1 ? 1 : 0.8 }}
                         />
-                        <text textAnchor="middle" dy="5" className="fill-white font-bold text-[10px] tracking-[0.3em] pointer-events-none uppercase">Ingresos</text>
+                        <text textAnchor="middle" dy="5" className="fill-white font-black text-[11px] tracking-[0.3em] pointer-events-none uppercase">Ingresos</text>
                         
                         {/* Status Ring */}
                         <motion.circle
-                            r={78}
+                            r={85}
                             fill="none"
                             stroke="#397dc1"
                             strokeWidth="0.5"
-                            strokeDasharray="4 4"
+                            strokeDasharray="5 5"
                             animate={{ rotate: 360 }}
                             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                            style={{ opacity: state >= 1 ? 0.4 : 0 }}
+                            className="opacity-40"
                         />
                     </g>
 
@@ -164,31 +173,30 @@ export default function LeakBuster() {
                                     x2={cat.x} y2={cat.y}
                                     stroke={isLeak && state >= 3 ? "#f36e53" : "#397dc1"}
                                     strokeWidth="0.5"
-                                    initial={{ opacity: 0 }}
                                     animate={{ 
-                                        opacity: state >= 1 ? (state >= 3 && !isLeak ? 0.05 : 0.2) : 0,
+                                        opacity: state >= 3 && !isLeak ? 0.05 : 0.2,
                                         strokeWidth: state === 2 ? 1 : 0.5
                                     }}
                                 />
 
                                 {/* Moving Particles: Transaction Data */}
-                                {state >= 1 && (state < 4 || isLeak) && (
+                                {(state < 4 || isLeak) && (
                                     <g>
-                                        {[0, 1, 2, 3, 4].map((i) => (
+                                        {[0, 1, 2, 3].map((i) => (
                                             <motion.circle
                                                 key={i}
-                                                r="1.5"
-                                                fill={isLeak && state >= 3 ? "#f36e53" : "#397dc1"}
-                                                filter="url(#system-glow)"
+                                                r="2"
+                                                fill={isLeak && state >= 3 ? "#f36e53" : "#06b6d4"}
+                                                filter="url(#system-glow-fix)"
                                                 initial={{ offsetDistance: "0%", opacity: 0 }}
                                                 animate={{ 
                                                     offsetDistance: "100%",
                                                     opacity: [0, 1, 0]
                                                 }}
                                                 transition={{ 
-                                                    duration: isLeak && state >= 3 ? 1.5 : 3, 
+                                                    duration: isLeak && state >= 3 ? 1.2 : 2.5, 
                                                     repeat: Infinity, 
-                                                    delay: i * 0.7,
+                                                    delay: i * 0.6,
                                                     ease: "linear"
                                                 }}
                                                 style={{ 
@@ -201,12 +209,11 @@ export default function LeakBuster() {
 
                                 {/* Category Clusters */}
                                 <motion.g
-                                    initial={{ scale: 0, opacity: 0 }}
                                     animate={{ 
-                                        scale: state >= 1 ? (isLeak && state >= 3 ? 1.25 : 1) : 0,
-                                        opacity: state >= 1 ? (state >= 3 && !isLeak ? 0.3 : 1) : 0
+                                        scale: isLeak && state >= 3 ? 1.3 : 1,
+                                        opacity: state >= 3 && !isLeak ? 0.3 : 1
                                     }}
-                                    transition={{ duration: 1, type: "spring" }}
+                                    transition={{ duration: 0.8, type: "spring" }}
                                 >
                                     <circle
                                         cx={cat.x} cy={cat.y} r={35}
@@ -214,7 +221,7 @@ export default function LeakBuster() {
                                         stroke={isLeak && state >= 3 ? '#f36e53' : cat.color}
                                         strokeWidth="1.5"
                                         className={isLeak && state === 3 ? "animate-pulse" : (state === 2 ? "animate-[pulse_4s_ease-in-out_infinite]" : "")}
-                                        style={{ filter: isLeak && state >= 3 ? "url(#high-alert-glow)" : "url(#system-glow)" }}
+                                        style={{ filter: isLeak && state >= 3 ? "url(#high-alert-glow-fix)" : "url(#system-glow-fix)" }}
                                     />
                                     <text
                                         x={cat.x} y={cat.y}
@@ -227,11 +234,12 @@ export default function LeakBuster() {
                                     {/* State 4: High resolution leak metrics */}
                                     {isLeak && state === 4 && (
                                         <motion.g
-                                            initial={{ opacity: 0, y: 5 }}
+                                            initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.2 }}
                                         >
-                                            <rect x={cat.x - 60} y={cat.y + 45} width="120" height="24" rx="12" fill="#000" stroke="#f36e53" strokeWidth="1" className="opacity-80" />
-                                            <text x={cat.x} y={cat.y + 61} textAnchor="middle" className="fill-white font-bold text-[9px] uppercase tracking-widest">$150.000 en 30 tx</text>
+                                            <rect x={cat.x - 70} y={cat.y + 45} width="140" height="26" rx="13" fill="#000" stroke="#f36e53" strokeWidth="1" className="opacity-90 shadow-2xl" />
+                                            <text x={cat.x} y={cat.y + 62} textAnchor="middle" className="fill-[#f36e53] font-black text-[10px] uppercase tracking-widest">$150.000 en 30 tx</text>
                                         </motion.g>
                                     )}
                                 </motion.g>
@@ -239,7 +247,7 @@ export default function LeakBuster() {
                         );
                     })}
 
-                    {/* System Scanning Overlay in State 2-3 */}
+                    {/* Scanning Onda in State 2-3 */}
                     {(state === 2 || state === 3) && (
                         <motion.circle
                             cx={centerX} cy={centerY}
@@ -254,21 +262,26 @@ export default function LeakBuster() {
                 </svg>
 
                 {/* Footer Technical Metadata */}
-                <div className="absolute bottom-10 left-12 right-12 flex justify-between items-end">
+                <div className="absolute bottom-10 left-12 right-12 flex justify-between items-end bg-black/40 backdrop-blur-md p-4 rounded-2xl border border-white/5">
                     <div className="space-y-1">
-                        <p className="text-[8px] font-mono text-white/20 uppercase tracking-[0.2em]">Engine Status: <span className="text-[#397dc1]">Operational</span></p>
-                        <p className="text-[8px] font-mono text-white/20 uppercase tracking-[0.2em]">Data Feed: <span className="text-[#397dc1]">Encrypted</span></p>
+                        <p className="text-[8px] font-mono text-white/40 uppercase tracking-[0.2em] font-bold">LUKAS ENGINE STATUS: <span className="text-[#397dc1] animate-pulse">ACTIVE_SCAN</span></p>
+                        <p className="text-[8px] font-mono text-white/20 uppercase tracking-[0.2em]">LATENCY: <span className="text-[#397dc1]">1.2ms</span></p>
                     </div>
-                    <div className="text-right space-y-1">
-                        <p className="text-[10px] font-mono font-black text-white/30 tracking-[0.3em] uppercase">Lukas AI Analysis Engine</p>
-                        <div className="flex justify-end gap-1">
-                            {[0, 1, 2, 3].map(i => (
-                                <div key={i} className={`h-1 w-4 rounded-full ${state > i ? 'bg-[#397dc1]' : 'bg-white/5'}`} />
+                    <div className="text-right space-y-2">
+                        <p className="text-[10px] font-mono font-black text-white/50 tracking-[0.3em] uppercase">Analysis Cycle</p>
+                        <div className="flex justify-end gap-1.5">
+                            {[1, 2, 3, 4].map(idx => (
+                                <div key={idx} className={`h-1.5 w-6 rounded-full transition-all duration-500 ${state === idx ? (state === 3 ? 'bg-[#f36e53] w-10 shadow-[0_0_10px_#f36e53]' : 'bg-[#397dc1] w-10 shadow-[0_0_10px_#397dc1]') : 'bg-white/10'}`} />
                             ))}
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Technical Caption below Container */}
+            <p className="text-center mt-8 text-[10px] font-mono font-black text-white/20 tracking-[0.5em] uppercase">
+                Análisis financiero en tiempo real con Lukas AI Engine v4.2
+            </p>
         </section>
     );
 }
