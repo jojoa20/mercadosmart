@@ -9,6 +9,7 @@ import AIPersonality from "@/components/AIPersonality";
 import Features from "@/components/Features";
 import WeeklyHeatmap from "@/components/WeeklyHeatmap";
 import InteractiveDemo from "@/components/InteractiveDemo";
+import Storytelling from "@/components/Storytelling";
 import FinancialProjection from "@/components/FinancialProjection";
 import CTA from "@/components/CTA";
 
@@ -26,6 +27,7 @@ export default function Home() {
       <Features />
       <WeeklyHeatmap />
       <InteractiveDemo />
+      <Storytelling />
       <FinancialProjection />
       <CTA />
     </main>
