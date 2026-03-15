@@ -100,18 +100,18 @@ export default function CTA() {
                 <div className="absolute inset-0 bg-gradient-to-t from-[#397dc1]/10 to-transparent pointer-events-none" />
 
                 <h2 className="text-4xl md:text-6xl font-black mb-6 text-white tracking-tight drop-shadow-xl relative z-10">
-                    Si no sabes a dónde se va tu plata, Lukas sí.
+                    Si no sabes a dónde se fue tu plata, Lukas sí.
                 </h2>
 
                 <p className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#397dc1] to-[#a898c9] mb-12 drop-shadow-md relative z-10">
-                    Empieza a mejorar tu salud financiera hoy.
+                    Empieza a entender tus finanzas en minutos.
                 </p>
 
                 <button
-                    className="relative group px-10 md:px-14 py-4 md:py-5 rounded-full bg-white text-black font-extrabold text-lg md:text-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(57,125,193,0.4)] btn-glow-hover active:scale-95 overflow-hidden z-20"
+                    className="relative group px-10 md:px-14 py-4 md:py-5 rounded-full bg-white text-black font-extrabold text-lg md:text-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(57,125,193,0.6)] btn-glow-hover active:scale-95 overflow-hidden z-20"
                 >
                     <span className="relative z-10">Hablar con Lukas</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#397dc1]/20 via-[#a898c9]/20 to-[#397dc1]/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#397dc1]/30 via-[#a898c9]/30 to-[#397dc1]/30 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                 </button>
 
             </div>
