@@ -25,7 +25,7 @@ export default function Comparison() {
             <div className="flex flex-col lg:flex-row items-stretch justify-center gap-6 max-w-5xl mx-auto relative z-10">
                 
                 {/* Column 1: Traditional */}
-                <div className="flex-1 bg-white/5 border border-white/10 rounded-3xl p-8 lg:p-10 opacity-70 flex flex-col transition-all duration-300 hover:opacity-100">
+                <div className="flex-1 bg-white/5 border border-white/10 rounded-3xl p-8 lg:p-10 opacity-70 flex flex-col transition-all duration-300 hover:opacity-100 spotlight-card">
                     <div className="flex items-center gap-3 mb-8 pb-6 border-b border-white/10">
                         <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-xl grayscale">
                             📊
@@ -58,7 +58,7 @@ export default function Comparison() {
                 </div>
 
                 {/* Column 2: Lukas AI */}
-                <div className="flex-1 bg-[#1e1b4b]/60 border-2 border-[#397dc1]/30 rounded-3xl p-8 lg:p-10 shadow-[0_0_50px_rgba(57,125,193,0.15)] flex flex-col relative transform lg:-translate-y-4 transition-transform duration-500 hover:-translate-y-6">
+                <div className="flex-1 bg-[#1e1b4b]/60 border-2 border-[#397dc1]/30 rounded-3xl p-8 lg:p-10 shadow-[0_0_50px_rgba(57,125,193,0.15)] flex flex-col relative transform lg:-translate-y-4 transition-transform duration-500 hover:-translate-y-6 spotlight-card">
                     
                     {/* Glowing highlight edge */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-[2px] bg-gradient-to-r from-transparent via-[#397dc1] to-transparent"></div>

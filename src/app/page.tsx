@@ -1,3 +1,7 @@
+"use client";
+
+import React, { useEffect } from "react";
+import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import ProblemStatement from "@/components/ProblemStatement";
 import InputMethods from "@/components/InputMethods";
@@ -17,8 +21,25 @@ import CTA from "@/components/CTA";
 import BackgroundNetwork from "@/components/BackgroundNetwork";
 
 export default function Home() {
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const cards = document.getElementsByClassName("spotlight-card");
+      for (const card of cards as any) {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty("--mouse-x", `${x}px`);
+        card.style.setProperty("--mouse-y", `${y}px`);
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
   return (
-    <main className="min-h-screen bg-transparent text-white selection:bg-lukas-primary selection:text-white pb-20 overflow-hidden">
+    <main className="min-h-screen bg-transparent text-white selection:bg-lukas-primary selection:text-white pb-20 overflow-hidden relative">
+      <Navbar />
       <BackgroundNetwork />
       <Hero />
       <ProblemStatement />
@@ -39,3 +60,4 @@ export default function Home() {
     </main>
   );
 }
+

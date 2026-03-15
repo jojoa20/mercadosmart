@@ -53,10 +53,10 @@ export default function Hero() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <button className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#397dc1] to-[#6b4de6] font-bold text-white transition-all duration-300 shadow-[0_0_20px_rgba(57,125,193,0.4)] hover:shadow-[0_0_30px_rgba(57,125,193,0.6)] hover:-translate-y-1">
+                    <button className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#397dc1] to-[#6b4de6] font-bold text-white transition-all duration-300 shadow-[0_0_20px_rgba(57,125,193,0.4)] hover:shadow-[0_0_30px_rgba(57,125,193,0.6)] hover:-translate-y-1 hover:scale-105 btn-glow-hover active:scale-95">
                         Probar Lukas
                     </button>
-                    <button className="px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold border border-white/10 transition-all duration-300 hover:-translate-y-1 backdrop-blur-md">
+                    <button className="px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold border border-white/10 transition-all duration-300 hover:-translate-y-1 hover:scale-105 backdrop-blur-md active:scale-95">
                         Ver demo
                     </button>
                 </div>

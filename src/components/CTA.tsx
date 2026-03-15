@@ -108,7 +108,7 @@ export default function CTA() {
                 </p>
 
                 <button
-                    className="relative group px-10 md:px-14 py-4 md:py-5 rounded-full bg-white text-black font-extrabold text-lg md:text-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(57,125,193,0.4)] overflow-hidden z-20"
+                    className="relative group px-10 md:px-14 py-4 md:py-5 rounded-full bg-white text-black font-extrabold text-lg md:text-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(57,125,193,0.4)] btn-glow-hover active:scale-95 overflow-hidden z-20"
                 >
                     <span className="relative z-10">Empieza a usar Lukas</span>
                     <div className="absolute inset-0 bg-gradient-to-r from-[#397dc1]/20 via-[#a898c9]/20 to-[#397dc1]/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />

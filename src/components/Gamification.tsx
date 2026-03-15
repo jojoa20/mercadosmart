@@ -57,7 +57,7 @@ export default function Gamification() {
                 {ACHIEVEMENTS.map((badge) => (
                     <div 
                         key={badge.id}
-                        className={`group relative bg-[#1e1b4b]/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col items-center text-center transition-all duration-500 ease-out cursor-default hover:-translate-y-2 ${badge.borderClass} ${badge.glowClass}`}
+                        className={`group relative bg-[#1e1b4b]/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col items-center text-center transition-all duration-500 ease-out cursor-default hover:-translate-y-2 spotlight-card ${badge.borderClass} ${badge.glowClass}`}
                     >
                         {/* Decorative background flare on hover */}
                         <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
