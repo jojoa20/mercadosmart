@@ -11,6 +11,7 @@ import WeeklyHeatmap from "@/components/WeeklyHeatmap";
 import InteractiveDemo from "@/components/InteractiveDemo";
 import Storytelling from "@/components/Storytelling";
 import Gamification from "@/components/Gamification";
+import Comparison from "@/components/Comparison";
 import FinancialProjection from "@/components/FinancialProjection";
 import CTA from "@/components/CTA";
 
@@ -30,6 +31,7 @@ export default function Home() {
       <InteractiveDemo />
       <Storytelling />
       <Gamification />
+      <Comparison />
       <FinancialProjection />
       <CTA />
     </main>
