@@ -1,314 +1,283 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
-import * as d3 from 'd3';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-interface GraphNode extends d3.SimulationNodeDatum {
-    id: string;
-    group: number;
-    radius: number;
-    label: string;
-    isAlert?: boolean;
-    amount?: string;
-    transactions?: number;
-}
-
-interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
-    source: string | GraphNode;
-    target: string | GraphNode;
-}
-
-const data = {
-    nodes: [
-        { id: "root", group: 1, radius: 75, label: "Ingresos / Quincena" } as GraphNode,
-        // Clusters
-        { id: "cafes", group: 2, radius: 48, label: "Cafés", isAlert: true, amount: "$150.000 COP", transactions: 30 } as GraphNode,
-        { id: "streaming", group: 3, radius: 38, label: "Streaming", amount: "$45.000 COP", transactions: 2 } as GraphNode,
-        { id: "domicilios", group: 2, radius: 55, label: "Domicilios", isAlert: true, amount: "$210.000 COP", transactions: 7 } as GraphNode,
-        { id: "transporte", group: 4, radius: 48, label: "Transporte", amount: "$80.000 COP", transactions: 15 } as GraphNode,
-        { id: "suscripciones", group: 3, radius: 32, label: "Suscripciones", amount: "$35.000 COP", transactions: 3 } as GraphNode,
-        { id: "ahorro", group: 5, radius: 60, label: "Ahorro programado", amount: "$500.000 COP", transactions: 1 } as GraphNode,
-    ],
-    links: [
-        { source: "root", target: "cafes" },
-        { source: "root", target: "streaming" },
-        { source: "root", target: "domicilios" },
-        { source: "root", target: "transporte" },
-        { source: "root", target: "suscripciones" },
-        { source: "root", target: "ahorro" }
-    ] as GraphLink[]
-};
-
-// Add scattered transaction child nodes
-const generateChildren = (parentId: string, count: number, group: number, isAlert: boolean = false) => {
-    for (let i = 0; i < count; i++) {
-        const childId = `${parentId}_child_${i}`;
-        data.nodes.push({ id: childId, group, radius: Math.random() * 4 + 4, label: "", isAlert } as GraphNode);
-        data.links.push({ source: parentId, target: childId });
-    }
-};
-
-// Generate transaction nodes
-generateChildren("cafes", 30, 2, true);
-generateChildren("streaming", 2, 3);
-generateChildren("domicilios", 7, 2, true);
-generateChildren("transporte", 15, 4);
-generateChildren("suscripciones", 3, 3);
-generateChildren("ahorro", 1, 5);
+const CATEGORIES = [
+    { id: 'cafes', label: 'Cafés', color: '#397dc1' },
+    { id: 'streaming', label: 'Streaming', color: '#a898c9' },
+    { id: 'domicilios', label: 'Domicilios', color: '#f36e53' }, // The Leak
+    { id: 'transporte', label: 'Transporte', color: '#397dc1' },
+    { id: 'compras', label: 'Compras impulsivas', color: '#a898c9' },
+    { id: 'suscripciones', label: 'Suscripciones', color: '#d8a93f' }
+];
 
 export default function LeakBuster() {
-    const svgRef = useRef<SVGSVGElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [tooltip, setTooltip] = useState<{ visible: boolean, x: number, y: number, node: GraphNode | null }>({
-        visible: false,
-        x: 0,
-        y: 0,
-        node: null
-    });
+    const [phase, setPhase] = useState(1); // 1: Flow, 2: Detection, 3: Analysis
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        if (!svgRef.current || !containerRef.current) return;
-
-        const width = containerRef.current.clientWidth;
-        const height = 750;
-
-        const svg = d3.select(svgRef.current)
-            .attr("width", width)
-            .attr("height", height)
-            .attr("viewBox", [0, 0, width, height]);
-
-        svg.selectAll("*").remove(); 
-
-        const colors = {
-            root: "#a898c9", 
-            alert: "#f36e53", 
-            normal: "#397dc1", 
-            healthy: "#d8a93f" 
-        };
-
-        const getNodeColor = (d: GraphNode) => {
-            if (d.id === "root") return colors.root;
-            if (d.isAlert) return colors.alert;
-            if (d.group === 5) return colors.healthy;
-            return colors.normal;
-        };
-
-        // Enhanced force simulation for "life"
-        const simulation = d3.forceSimulation<GraphNode>(data.nodes as GraphNode[])
-            .force("link", d3.forceLink<GraphNode, GraphLink>(data.links).id(d => d.id).distance(d => {
-                return (d.source as GraphNode).id === "root" ? 220 : 45;
-            }))
-            .force("charge", d3.forceManyBody<GraphNode>().strength((d) => d.id === "root" ? -1500 : (d.label ? -600 : -50)))
-            .force("center", d3.forceCenter(width / 2, height / 2))
-            .force("collide", d3.forceCollide<GraphNode>().radius((d) => d.radius + 10).iterations(3))
-            // Force aimed at making nodes move gently even without user input
-            .alphaDecay(0.01) // Slower decay to keep it moving longer
-            .alphaTarget(0.02); // Target slightly above 0 for continuous gentle vibe
-
-        // Links
-        const link = svg.append("g")
-            .attr("stroke", "rgba(255,255,255,0.1)")
-            .attr("stroke-opacity", 0.4)
-            .selectAll("line")
-            .data(data.links)
-            .join("line")
-            .attr("stroke-width", d => Math.sqrt(d.source === "root" ? 4 : 1.5));
-
-        const nodeGroup = svg.append("g");
-
-        const defs = svg.append("defs");
+        setMounted(true);
         
-        // Regular glow
-        const glowFilter = defs.append("filter").attr("id", "glow");
-        glowFilter.append("feGaussianBlur").attr("stdDeviation", "4").attr("result", "coloredBlur");
-        const feMerge = glowFilter.append("feMerge");
-        feMerge.append("feMergeNode").attr("in", "coloredBlur");
-        feMerge.append("feMergeNode").attr("in", "SourceGraphic");
-
-        // Intense Alert Pulse Filter
-        const alertFilter = defs.append("filter").attr("id", "alertPulse");
-        alertFilter.append("feGaussianBlur").attr("stdDeviation", "8").attr("result", "blur");
-        const feMergeAlert = alertFilter.append("feMerge");
-        feMergeAlert.append("feMergeNode").attr("in", "blur");
-        feMergeAlert.append("feMergeNode").attr("in", "SourceGraphic");
-
-        // Nodes
-        const node = nodeGroup.selectAll<SVGCircleElement, GraphNode>("circle")
-            .data(data.nodes)
-            .join("circle")
-            .attr("r", d => d.radius)
-            .attr("fill", d => getNodeColor(d))
-            .attr("stroke", d => d.id === "root" ? "rgba(168,152,201,0.6)" : "none")
-            .attr("stroke-width", 5)
-            .attr("class", d => d.isAlert && d.label ? "animate-[pulse_1.5s_ease-in-out_infinite] cursor-pointer" : "transition-transform duration-500 hover:scale-[1.2] cursor-pointer")
-            .style("filter", d => d.isAlert && d.label ? "url(#alertPulse)" : "url(#glow)") 
-            .on("mouseover", (event, d) => {
-                if (!d.label) return;
-                setTooltip({
-                    visible: true,
-                    x: event.pageX,
-                    y: event.pageY,
-                    node: d
-                });
-                d3.select(event.currentTarget).attr("stroke", "rgba(255,255,255,0.8)").attr("stroke-width", 6);
-            })
-            .on("mousemove", (event) => {
-                setTooltip(prev => ({ ...prev, x: event.pageX, y: event.pageY }));
-            })
-            .on("mouseout", (event, d) => {
-                setTooltip(prev => ({ ...prev, visible: false }));
-                d3.select(event.currentTarget).attr("stroke", d.id === "root" ? "rgba(168,152,201,0.6)" : "none").attr("stroke-width", 5);
-            })
-            .call(d3.drag<SVGCircleElement, GraphNode>()
-                .on("start", (event, d) => {
-                    if (!event.active) simulation.alphaTarget(0.3).restart();
-                    d.fx = d.x;
-                    d.fy = d.y;
-                })
-                .on("drag", (event, d) => {
-                    d.fx = event.x;
-                    d.fy = event.y;
-                })
-                .on("end", (event, d) => {
-                    if (!event.active) simulation.alphaTarget(0.02); // Return to steady vibe
-                    d.fx = null;
-                    d.fy = null;
-                })
-            );
-
-        // Labels for parent nodes
-        const labels = svg.append("g")
-            .selectAll("text")
-            .data(data.nodes.filter(d => d.label))
-            .join("text")
-            .text(d => d.label)
-            .attr("text-anchor", "middle")
-            .attr("dy", d => d.id === "root" ? 8 : d.radius + 24)
-            .attr("fill", d => d.id === "root" ? "#1e1b4b" : "white")
-            .attr("font-size", d => d.id === "root" ? "16px" : "14px")
-            .attr("font-weight", "900")
-            .style("text-shadow", "0px 2px 10px rgba(0,0,0,0.9)")
-            .style("pointer-events", "none")
-            .style("letter-spacing", "0.025em");
-
-        // Small inner icon for the root source node
-        const rootIcon = svg.append("text")
-            .datum(data.nodes[0])
-            .text("💰")
-            .attr("text-anchor", "middle")
-            .attr("dy", -12)
-            .attr("font-size", "32px")
-            .style("pointer-events", "none");
-
-        simulation.on("tick", () => {
-            link
-                .attr("x1", d => (d.source as GraphNode).x!)
-                .attr("y1", d => (d.source as GraphNode).y!)
-                .attr("x2", d => (d.target as GraphNode).x!)
-                .attr("y2", d => (d.target as GraphNode).y!);
-
-            node
-                .attr("cx", d => d.x!)
-                .attr("cy", d => d.y!);
-
-            labels
-                .attr("x", d => d.x!)
-                .attr("y", d => d.y!);
-
-            rootIcon
-                .attr("x", d => d.x!)
-                .attr("y", d => d.y!);
-        });
-
-        // Autonomous Movement: Inject subtle velocity randomly
-        const moveTimer = setInterval(() => {
-            data.nodes.forEach(node => {
-                if (!node.fx) {
-                    node.vx = (node.vx || 0) + (Math.random() - 0.5) * 0.2;
-                    node.vy = (node.vy || 0) + (Math.random() - 0.5) * 0.2;
-                }
-            });
-        }, 2000);
-
-        return () => {
-            simulation.stop();
-            clearInterval(moveTimer);
+        let phaseTimer: NodeJS.Timeout;
+        
+        const startSequence = () => {
+            setPhase(1);
+            
+            phaseTimer = setTimeout(() => {
+                setPhase(2);
+                phaseTimer = setTimeout(() => {
+                    setPhase(3);
+                    phaseTimer = setTimeout(() => {
+                        startSequence(); // Loop
+                    }, 4000);
+                }, 3000);
+            }, 4000);
         };
+
+        startSequence();
+
+        return () => clearTimeout(phaseTimer);
     }, []);
+
+    // Radial layout for categories
+    const categoryPositions = useMemo(() => {
+        const radius = 220;
+        return CATEGORIES.map((cat, i) => {
+            const angle = (i * (360 / CATEGORIES.length) - 90) * (Math.PI / 180);
+            return {
+                ...cat,
+                x: 400 + Math.cos(angle) * radius,
+                y: 350 + Math.sin(angle) * radius
+            };
+        });
+    }, []);
+
+    if (!mounted) return null;
 
     return (
         <section className="relative py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/5 bg-transparent overflow-hidden">
             
-            {/* Focal Point Background Glow */}
+            {/* Background Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[700px] bg-[#397dc1]/5 blur-[200px] rounded-[100%] pointer-events-none -z-10" />
 
-            <div className="text-center mb-16 max-w-4xl mx-auto">
-                <span className="text-xs uppercase tracking-[0.4em] font-black text-[#397dc1] mb-6 block drop-shadow-sm">ANÁLISIS DE FLUJO</span>
-                <h2 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 tracking-tighter text-white">
-                    Lukas <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#f36e53] to-[#d8a93f]">Leak Buster</span>
-                </h2>
-                <p className="text-white/60 text-xl md:text-2xl leading-relaxed max-w-3xl mx-auto">
-                    Visualización avanzada de clústeres donde Lukas identifica y aísla las fugas de capital en tiempo real.
-                </p>
+            <div className="text-center mb-16 max-w-4xl mx-auto h-32">
+                <span className="text-xs uppercase tracking-[0.4em] font-black text-[#397dc1] mb-6 block drop-shadow-sm">LUKAS LEAK BUSTER 3.0</span>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={phase}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <h2 className="text-4xl md:text-6xl font-black mb-4 tracking-tighter text-white">
+                            {phase === 1 && "Visualizando Flujo de Efectivo"}
+                            {phase === 2 && <span className="text-[#f36e53]">Cluster Detectado: Gasto Hormiga</span>}
+                            {phase === 3 && <span className="text-[#397dc1]">Lukas: Fuga Analizada y Estabilizada</span>}
+                        </h2>
+                        <p className="text-white/60 text-lg md:text-xl font-medium">
+                            {phase === 1 && "Lukas mapea cada transacción desde tus ingresos a las categorías de gasto."}
+                            {phase === 2 && "Un patrón inusual ha sido detectado en el clúster de 'Domicilios'."}
+                            {phase === 3 && "Optimizando clústers para maximizar tu FinScore."}
+                        </p>
+                    </motion.div>
+                </AnimatePresence>
             </div>
 
-            <div className="relative w-full max-w-6xl mx-auto rounded-[3.5rem] border border-white/10 bg-gradient-to-b from-[#1e1b4b]/40 to-black/40 backdrop-blur-3xl overflow-hidden shadow-[0_0_100px_rgba(33,66,141,0.3)] group" ref={containerRef}>
-                
-                {/* Visual Grid Background */}
+            <div className="relative w-full max-w-5xl mx-auto aspect-[16/10] sm:aspect-[4/3] md:aspect-video rounded-[3rem] border border-white/10 bg-black/40 backdrop-blur-3xl overflow-hidden shadow-[0_0_100px_rgba(33,66,141,0.2)]">
+                {/* Visual Grid */}
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
-                {/* D3 SVG Container */}
-                <svg ref={svgRef} className="w-full min-h-[750px] cursor-grab active:cursor-grabbing relative z-10" />
+                <svg className="w-full h-full" viewBox="0 0 800 650">
+                    <defs>
+                        <filter id="glow-node">
+                            <feGaussianBlur stdDeviation="3" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                        <filter id="glow-leak">
+                            <feGaussianBlur stdDeviation="8" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                    </defs>
 
-                {/* Legend */}
-                <div className="absolute bottom-10 left-10 z-20 hidden md:flex flex-col gap-3 glass p-6 rounded-3xl border border-white/10">
-                    <div className="flex items-center gap-3">
-                        <div className="w-3 h-3 rounded-full bg-[#f36e53] shadow-[0_0_10px_#f36e53]" />
-                        <span className="text-xs font-bold text-white/70 uppercase tracking-widest">Fuga Detectada</span>
+                    {/* Central Node: INGRESOS */}
+                    <g transform="translate(400, 350)">
+                        <motion.circle
+                            r={60}
+                            fill="#1e1b4b"
+                            stroke="#a898c9"
+                            strokeWidth="2"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ duration: 1, type: "spring" }}
+                        />
+                        <text textAnchor="middle" dy="5" className="fill-white font-black text-xs tracking-widest pointer-events-none">INGRESOS</text>
+                        <text textAnchor="middle" dy="25" className="fill-white/40 font-bold text-[8px] tracking-tighter">$4.500.000</text>
+                    </g>
+
+                    {/* Category Nodes and Particles */}
+                    {categoryPositions.map((cat) => {
+                        const isLeak = cat.id === 'domicilios';
+                        const isDimmed = phase === 2 && !isLeak;
+                        
+                        return (
+                            <g key={cat.id}>
+                                {/* Connection Line */}
+                                <motion.line
+                                    x1="400" y1="350"
+                                    x2={cat.x} y2={cat.y}
+                                    stroke={cat.color}
+                                    strokeWidth="1"
+                                    strokeOpacity={isDimmed ? 0.05 : 0.2}
+                                    initial={{ pathLength: 0 }}
+                                    animate={{ pathLength: 1 }}
+                                    transition={{ duration: 1.5, delay: 0.5 }}
+                                />
+
+                                {/* Category Particles */}
+                                {phase <= 2 && !isDimmed && (
+                                    <g>
+                                        {[0, 1, 2, 3, 4].map((i) => (
+                                            <motion.circle
+                                                key={i}
+                                                r="2"
+                                                fill={cat.color}
+                                                filter="url(#glow-node)"
+                                                initial={{ offsetDistance: "0%" }}
+                                                animate={{ 
+                                                    offsetDistance: "100%",
+                                                    opacity: [0, 1, 0]
+                                                }}
+                                                transition={{ 
+                                                    duration: isLeak && phase === 2 ? 1.5 : 2.5, 
+                                                    repeat: Infinity, 
+                                                    delay: i * 0.5,
+                                                    ease: "linear"
+                                                }}
+                                                style={{ 
+                                                    offsetPath: `path('M 400 350 L ${cat.x} ${cat.y}')`,
+                                                    position: 'absolute'
+                                                }}
+                                            />
+                                        ))}
+                                    </g>
+                                )}
+
+                                {/* Node */}
+                                <motion.g
+                                    initial={{ scale: 0 }}
+                                    animate={{ 
+                                        scale: isLeak && phase === 2 ? 1.4 : 1,
+                                        opacity: isDimmed ? 0.2 : 1
+                                    }}
+                                    transition={{ duration: 0.8, type: "spring" }}
+                                >
+                                    <circle
+                                        cx={cat.x} cy={cat.y} r={isLeak && phase === 2 ? 45 : 35}
+                                        fill="#0f172a"
+                                        stroke={isLeak && phase >= 2 ? '#f36e53' : cat.color}
+                                        strokeWidth="2"
+                                        className={isLeak && phase === 2 ? "animate-pulse" : ""}
+                                        style={{ filter: isLeak && phase === 2 ? "url(#glow-leak)" : "none" }}
+                                    />
+                                    <text
+                                        x={cat.x} y={cat.y}
+                                        textAnchor="middle" dy="5"
+                                        className="fill-white font-black text-[10px] tracking-tight pointer-events-none"
+                                    >
+                                        {cat.label}
+                                    </text>
+                                    
+                                    {isLeak && phase >= 2 && (
+                                        <motion.text
+                                            x={cat.x} y={cat.y + 15}
+                                            textAnchor="middle"
+                                            className="fill-[#f36e53] font-bold text-[8px] pointer-events-none"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                        >
+                                            $150.000 (30 tx)
+                                        </motion.text>
+                                    )}
+                                </motion.g>
+
+                                {/* Lukas Analysis UI Overlay */}
+                                {isLeak && phase === 3 && (
+                                    <g>
+                                        <motion.circle
+                                            cx={cat.x} cy={cat.y} r={60}
+                                            fill="none"
+                                            stroke="#397dc1"
+                                            strokeWidth="1"
+                                            strokeDasharray="5 5"
+                                            className="animate-[spin_4s_linear_infinite]"
+                                        />
+                                        <motion.circle
+                                            cx={cat.x} cy={cat.y}
+                                            initial={{ r: 0, opacity: 0 }}
+                                            animate={{ r: [0, 80, 100], opacity: [0, 0.5, 0] }}
+                                            transition={{ duration: 2, repeat: Infinity }}
+                                            fill="none"
+                                            stroke="#06b6d4"
+                                            strokeWidth="2"
+                                        />
+                                        <rect x={cat.x - 60} y={cat.y - 70} width="120" height="20" rx="10" className="fill-[#397dc1] shadow-xl" />
+                                        <text x={cat.x} y={cat.y - 57} textAnchor="middle" className="fill-white font-black text-[8px] tracking-[0.2em] uppercase">Fuga Detectada</text>
+                                    </g>
+                                )}
+                            </g>
+                        );
+                    })}
+
+                    {/* Scanning Line Overlay during Analysis */}
+                    {phase === 3 && (
+                        <motion.line
+                            x1="0" x2="800"
+                            initial={{ y: 0 }}
+                            animate={{ y: [0, 650, 0] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                            stroke="#06b6d4"
+                            strokeWidth="1"
+                            strokeOpacity="0.4"
+                            className="shadow-[0_0_20px_#06b6d4]"
+                        />
+                    )}
+                </svg>
+
+                {/* Phase Status Pill */}
+                <div className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-4">
+                    <div className={`px-4 py-1.5 rounded-full border transition-all duration-500 text-[10px] font-black tracking-widest uppercase ${phase === 1 ? 'bg-[#397dc1]/20 border-[#397dc1] text-white' : 'bg-white/5 border-white/10 text-white/30'}`}>
+                        Mapeo
                     </div>
-                    <div className="flex items-center gap-3">
-                        <div className="w-3 h-3 rounded-full bg-[#397dc1]" />
-                        <span className="text-xs font-bold text-white/70 uppercase tracking-widest">Gasto Normal</span>
+                    <div className={`px-4 py-1.5 rounded-full border transition-all duration-500 text-[10px] font-black tracking-widest uppercase ${phase === 2 ? 'bg-[#f36e53]/20 border-[#f36e53] text-white shadow-[0_0_15px_rgba(243,110,83,0.3)]' : 'bg-white/5 border-white/10 text-white/30'}`}>
+                        Detección
+                    </div>
+                    <div className={`px-4 py-1.5 rounded-full border transition-all duration-500 text-[10px] font-black tracking-widest uppercase ${phase === 3 ? 'bg-[#397dc1]/20 border-[#397dc1] text-white shadow-[0_0_15px_rgba(57,125,193,0.3)]' : 'bg-white/5 border-white/10 text-white/30'}`}>
+                        Estabilización
                     </div>
                 </div>
 
-                {/* Custom Tooltip */}
-                {tooltip.visible && tooltip.node && (
-                    <div
-                        className="fixed z-50 pointer-events-none transform -translate-x-1/2 -translate-y-[120%] animate-in fade-in zoom-in duration-200"
-                        style={{ left: tooltip.x, top: tooltip.y }}
-                    >
-                        <div className={`backdrop-blur-3xl border-2 ${tooltip.node.isAlert ? 'border-[#f36e53] bg-black/95 shadow-[0_0_40px_rgba(243,110,83,0.5)]' : 'border-white/20 bg-black/90 shadow-3xl'} rounded-[2rem] p-6 min-w-[280px]`}>
-                            {tooltip.node.isAlert && (
-                                <div className="text-xs font-black text-[#f36e53] tracking-[0.2em] uppercase mb-4 flex items-center gap-3">
-                                    <span className="w-3 h-3 rounded-full bg-[#f36e53] animate-ping" />
-                                    ALERTA DE FUGA
-                                </div>
-                            )}
-                            
-                            {tooltip.node.id === "root" ? (
-                                <>
-                                    <h4 className="text-2xl font-black text-white mb-2">{tooltip.node.label}</h4>
-                                    <p className="text-sm text-[#a898c9] font-bold tracking-wide uppercase">Source Alpha One</p>
-                                </>
-                            ) : (
-                                <>
-                                    <h4 className="text-2xl font-black text-white mb-4 tracking-tight">{tooltip.node.label}</h4>
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center py-2 border-b border-white/5">
-                                            <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">TOTAL GASTADO</span>
-                                            <span className="text-white font-black text-lg">{tooltip.node.amount}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center py-2">
-                                            <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">TRANSACCIONES</span>
-                                            <span className="text-white font-black text-lg">{tooltip.node.transactions}</span>
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                )}
+                {/* Lukas Status Text Bottom Right */}
+                <div className="absolute bottom-8 right-8 text-right font-mono text-[10px] space-y-1">
+                    <p className="text-[#397dc1] opacity-70 tracking-widest font-black flex items-center justify-end gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#397dc1] animate-pulse" />
+                        LUKAS ENGINE V3.0
+                    </p>
+                    <AnimatePresence mode="wait">
+                        <motion.p
+                            key={phase}
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            className="text-white/40 uppercase"
+                        >
+                            {phase === 1 && "Running money flux simulation..."}
+                            {phase === 2 && "ALERT: High density cluster detected in /FOOD"}
+                            {phase === 3 && "ANALYSIS COMPLETE: Savings optimized."}
+                        </motion.p>
+                    </AnimatePresence>
+                </div>
             </div>
         </section>
     );
