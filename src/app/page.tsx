@@ -7,6 +7,7 @@ import LeakDetection from "@/components/LeakDetection";
 import FinScore from "@/components/FinScore";
 import AIPersonality from "@/components/AIPersonality";
 import Features from "@/components/Features";
+import InteractiveDemo from "@/components/InteractiveDemo";
 import CTA from "@/components/CTA";
 
 export default function Home() {
@@ -21,6 +22,7 @@ export default function Home() {
       <FinScore />
       <AIPersonality />
       <Features />
+      <InteractiveDemo />
       <CTA />
     </main>
   );
