@@ -47,6 +47,9 @@ export default function Hero() {
                         <button className="group relative px-10 py-5 rounded-2xl bg-gradient-to-r from-[#397dc1] to-[#6b4de6] font-black text-white transition-all duration-300 shadow-[0_0_30px_rgba(57,125,193,0.3)] hover:shadow-[0_0_50px_rgba(57,125,193,0.5)] hover:-translate-y-1 hover:scale-105 active:scale-95 overflow-hidden">
                             <span className="relative z-10 text-lg">Probar Lukas</span>
                             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                            
+                            {/* Pulse Aura Glow */}
+                            <div className="absolute -inset-1 bg-gradient-to-r from-[#397dc1] to-[#a898c9] rounded-2xl blur-xl opacity-20 group-hover:opacity-40 animate-pulse pointer-events-none z-0" />
                         </button>
                         
                         <button className="px-10 py-5 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-all duration-300 hover:-translate-y-1 hover:scale-105 backdrop-blur-md active:scale-95 text-lg">
