@@ -8,6 +8,7 @@ import FinScore from "@/components/FinScore";
 import AIPersonality from "@/components/AIPersonality";
 import Features from "@/components/Features";
 import InteractiveDemo from "@/components/InteractiveDemo";
+import FinancialProjection from "@/components/FinancialProjection";
 import CTA from "@/components/CTA";
 
 export default function Home() {
@@ -23,6 +24,7 @@ export default function Home() {
       <AIPersonality />
       <Features />
       <InteractiveDemo />
+      <FinancialProjection />
       <CTA />
     </main>
   );
