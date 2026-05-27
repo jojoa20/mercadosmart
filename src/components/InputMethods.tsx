@@ -91,8 +91,8 @@ export default function InputMethods() {
         {/* CARD 2 — VOICE INPUT */}
         <div className={`relative bg-black/40 border transition-all duration-700 rounded-[32px] p-8 backdrop-blur-xl overflow-hidden flex flex-col ${activeStep === 1 ? 'border-[#a898c9]/50 shadow-[0_0_40px_rgba(168,152,201,0.15)] scale-[1.02]' : 'border-white/5 opacity-40 scale-[0.98]'}`}>
           <div className="flex items-center gap-3 mb-10">
-            <div className="w-10 h-10 rounded-xl overflow-hidden border border-[#a898c9]/30 flex items-center justify-center">
-              <img src="/lukas-mascot.jpeg" alt="Lukas" className="w-full h-full object-cover" />
+            <div className="w-10 h-10 rounded-xl bg-[#a898c9]/10 flex items-center justify-center border border-[#a898c9]/30 text-[#a898c9]">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">Nota de Voz</h3>
